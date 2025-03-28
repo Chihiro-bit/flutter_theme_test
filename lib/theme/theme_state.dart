@@ -32,6 +32,7 @@ class ThemeState extends Equatable {
     };
   }
 
+
   factory ThemeState.fromMap(Map<String, dynamic> map) {
     return ThemeState(
       themeMode: ThemeMode.values[map['themeMode'] ?? 0],

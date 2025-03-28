@@ -13,10 +13,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Theme Manager'),
-        actions: const [
-          ThemeModeSelector(),
-          SizedBox(width: 16),
-        ],
+        actions: const [ThemeModeSelector(), SizedBox(width: 16)],
       ),
       body: SafeArea(
         child: Padding(
@@ -44,7 +41,8 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 16),
               const ThemedCard(
                 title: 'Secondary Card',
-                description: 'UI elements respond to theme changes automatically',
+                description:
+                    'UI elements respond to theme changes automatically',
                 icon: Icons.color_lens,
               ),
               const SizedBox(height: 32),
@@ -75,10 +73,8 @@ class HomeScreen extends StatelessWidget {
                   value: Theme.of(context).brightness == Brightness.dark,
                   onChanged: (value) {
                     context.read<ThemeBloc>().add(
-                          ThemeChanged(
-                            value ? ThemeMode.dark : ThemeMode.light,
-                          ),
-                        );
+                      ThemeChanged(value ? ThemeMode.dark : ThemeMode.light),
+                    );
                   },
                 ),
               ),
@@ -89,4 +85,3 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
