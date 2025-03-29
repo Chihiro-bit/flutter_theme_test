@@ -1,35 +1,44 @@
-Implement Dark Mode Switching & Persistence in Flutter with Bloc
-Modern app development often requires dark mode and light mode capabilities. Dark Mode has become a critical part of user experience. We want our app to switch themes based on system settings or user preferences and maintain consistency after restarts. This guide will walk you through implementing this using Bloc and hydrated_bloc.
+Here's the English translation of your technical document. I've maintained the structure and technical accuracy while adapting the language for natural English flow:
 
-✨ Why Choose Bloc?
-https://bloclibrary.dev/#/ is a popular state management solution in Flutter. Based on event-driven and state-response patterns, it effectively separates UI from business logic, enhancing code readability, maintainability, and testability.
+# Implement Dark Mode Switching & Persistence in Flutter with Bloc
 
-hydrated_bloc, an extension for Bloc, provides automatic state persistence capabilities by storing states locally. It's ideal for scenarios requiring retained settings (e.g., theme mode) between app sessions.
+Modern app development often requires dark mode and light mode capabilities. **Dark Mode** has become a critical part of user experience. We want our app to switch themes based on system settings or user preferences and maintain consistency after restarts. This guide will walk you through implementing this using **Bloc** and **hydrated_bloc**.
 
-✨ Why hydrated_bloc Instead of shared_preferences?
-While both shared_preferences and hydrated_bloc can save user preferences, they serve different purposes and have distinct advantages.
+## ✨ Why Choose Bloc?
 
-✅ Advantages of hydrated_bloc
-Comparison	hydrated_bloc	shared_preferences
-Integration	Built into Bloc architecture	Manual management
-Serialization	Automatic with fromJson/toJson	Manual per-field handling
-State Sync	Auto-sync with UI	Manual UI updates
-Maintainability	High, centralized logic	Repetitive code
-Performance	Memory cache + fast disk access	Slower disk reads
-Object Support	Complex state objects	Basic types only
+[Bloc](https://bloclibrary.dev/#/) is a popular state management solution in Flutter. Based on event-driven and state-response patterns, it effectively separates UI from business logic, enhancing code readability, maintainability, and testability.
 
-🚀 Performance: Faster Reads
-hydrated_bloc uses memory caching: After initial disk read, states remain in memory, enabling near-instant restoration.
+**hydrated_bloc**, an extension for Bloc, provides automatic state persistence capabilities by storing states locally. It's ideal for scenarios requiring retained settings (e.g., theme mode) between app sessions.
 
-shared_preferences requires asynchronous disk access for every read, even for single values, causing minor delays during app startup or quick theme switches.
+## ✨ Why `hydrated_bloc` Instead of `shared_preferences`?
 
-✅ In short:\
-If you're already using Bloc, hydrated_bloc makes state persistence "invisible", simplifying development and improving user experience.
+While both `shared_preferences` and `hydrated_bloc` can save user preferences, they serve different purposes and have distinct advantages.
 
-📁 Step 1: Add Dependencies
-Add these to pubspec.yaml:
+### ✅ Advantages of hydrated_bloc
 
-yaml
+| Comparison          | hydrated_bloc                     | shared_preferences |
+|---------------------|----------------------------------|-------------------|
+| **Integration**     | Built into Bloc architecture     | Manual management |
+| **Serialization**   | Automatic with `fromJson`/`toJson` | Manual per-field handling |
+| **State Sync**      | Auto-sync with UI                | Manual UI updates |
+| **Maintainability** | High, centralized logic          | Repetitive code   |
+| **Performance**     | Memory cache + fast disk access  | Slower disk reads |
+| **Object Support**  | Complex state objects            | Basic types only  |
+
+### 🚀 Performance: Faster Reads
+
+`hydrated_bloc` uses memory caching: After initial disk read, states remain in memory, enabling **near-instant restoration**.
+
+`shared_preferences` requires asynchronous disk access for every read, even for single values, causing minor delays during app startup or quick theme switches.
+
+> ✅ In short:\
+> If you're already using Bloc, **hydrated_bloc makes state persistence "invisible"**, simplifying development and improving user experience.
+
+## 📁 Step 1: Add Dependencies
+
+Add these to `pubspec.yaml`:
+
+```yaml
 dependencies:
   flutter:
     sdk: flutter
@@ -38,17 +47,21 @@ dependencies:
   hydrated_bloc: ^10.0.0
   path_provider: ^2.1.5
   equatable: ^2.0.5
-✅ Dependency Notes:
-flutter_bloc: Core Bloc functionality
-hydrated_bloc: State persistence
-path_provider: Storage path access
-equatable: Simplified state comparison
-🎨 Step 2: Define Light/Dark Themes
-Create an AppThemes class with theme definitions:
+```
 
-dart
+### ✅ Dependency Notes:
+- `flutter_bloc`: Core Bloc functionality
+- `hydrated_bloc`: State persistence
+- `path_provider`: Storage path access
+- `equatable`: Simplified state comparison
+
+## 🎨 Step 2: Define Light/Dark Themes
+
+Create an `AppThemes` class with theme definitions:
+
+```dart
 import 'package:flutter/material.dart';
- 
+
 class AppThemes {
   // Light theme
   static final ThemeData lightTheme = ThemeData(
@@ -91,7 +104,7 @@ class AppThemes {
       }),
     ),
   );
- 
+
   // Dark theme
   static final ThemeData darkTheme = ThemeData(
     useMaterial3: true,
@@ -134,23 +147,27 @@ class AppThemes {
     ),
   );
 }
-🧠 Key Points:
-brightness controls theme mode
-colorScheme.fromSeed auto-generates color schemes
-Unified configurations for AppBarTheme, ElevatedButtonTheme, etc.
-⚙️ Step 3: Create ThemeBloc
+```
+
+### 🧠 Key Points:
+- `brightness` controls theme mode
+- `colorScheme.fromSeed` auto-generates color schemes
+- Unified configurations for `AppBarTheme`, `ElevatedButtonTheme`, etc.
+
+## ⚙️ Step 3: Create ThemeBloc
+
 The Bloc handles theme state and events.
 
-dart
+```dart
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
- 
+
 import 'app_themes.dart';
- 
+
 part 'theme_event.dart';
 part 'theme_state.dart';
- 
+
 class ThemeBloc extends HydratedBloc<ThemeEvent, ThemeState> {
   ThemeBloc()
       : super(ThemeState(
@@ -161,71 +178,79 @@ class ThemeBloc extends HydratedBloc<ThemeEvent, ThemeState> {
     on<ThemeStarted>(_onThemeStarted);
     on<ThemeChanged>(_onThemeChanged);
   }
- 
+
   void _onThemeStarted(ThemeStarted event, Emitter<ThemeState> emit) {
     // HydratedBloc handles loading automatically
     // This event exists for consistency and future extensions
   }
- 
+
   void _onThemeChanged(ThemeChanged event, Emitter<ThemeState> emit) {
     emit(state.copyWith(themeMode: event.themeMode));
   }
- 
+
   @override
   ThemeState? fromJson(Map<String, dynamic> json) {
     return ThemeState.fromMap(json);
   }
- 
+
   @override
   Map<String, dynamic> toJson(ThemeState state) {
     return state.toMap();
   }
 }
-🧠 Key Points:
-ThemeMode.system follows system settings by default
-_onThemeChanged responds to user-initiated theme changes
-fromJson/toJson handle persistence serialization
-🔁 Theme Events
-dart
+```
+
+### 🧠 Key Points:
+- `ThemeMode.system` follows system settings by default
+- `_onThemeChanged` responds to user-initiated theme changes
+- `fromJson`/`toJson` handle persistence serialization
+
+## 🔁 Theme Events
+
+```dart
 part of 'theme_bloc.dart';
- 
+
 abstract class ThemeEvent extends Equatable {
   const ThemeEvent();
- 
+
   @override
   List<Object> get props => [];
 }
- 
+
 class ThemeStarted extends ThemeEvent {}
- 
+
 class ThemeChanged extends ThemeEvent {
   final ThemeMode themeMode;
- 
+
   const ThemeChanged(this.themeMode);
- 
+
   @override
   List<Object> get props => [themeMode];
 }
-All events inherit from ThemeEvent
-ThemeChanged carries a ThemeMode value
-📦 Theme State
-dart
+```
+
+- All events inherit from `ThemeEvent`
+- `ThemeChanged` carries a `ThemeMode` value
+
+## 📦 Theme State
+
+```dart
 part of 'theme_bloc.dart';
- 
+
 class ThemeState extends Equatable {
   final ThemeMode themeMode;
   final ThemeData lightTheme;
   final ThemeData darkTheme;
- 
+
   const ThemeState({
     required this.themeMode,
     required this.lightTheme,
     required this.darkTheme,
   });
- 
+
   @override
   List<Object> get props => [themeMode];
- 
+
   ThemeState copyWith({
     ThemeMode? themeMode,
     ThemeData? lightTheme,
@@ -237,13 +262,13 @@ class ThemeState extends Equatable {
       darkTheme: darkTheme ?? this.darkTheme,
     );
   }
- 
+
   Map<String, dynamic> toMap() {
     return {
       'themeMode': themeMode.index,
     };
   }
- 
+
   factory ThemeState.fromMap(Map<String, dynamic> map) {
     return ThemeState(
       themeMode: ThemeMode.values[map['themeMode'] ?? 0],
@@ -252,13 +277,17 @@ class ThemeState extends Equatable {
     );
   }
 }
-Contains current ThemeMode and both themes
-copyWith enables state updates
-Only themeMode is persisted for efficiency
-🏁 Step 4: Initialize and Provide Bloc
-Set up in main.dart:
+```
 
-dart
+- Contains current `ThemeMode` and both themes
+- `copyWith` enables state updates
+- Only `themeMode` is persisted for efficiency
+
+## 🏁 Step 4: Initialize and Provide Bloc
+
+Set up in `main.dart`:
+
+```dart
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HydratedBloc.storage = await HydratedStorage.build(
@@ -266,10 +295,12 @@ void main() async {
   );
   runApp(const MyApp());
 }
-dart
+```
+
+```dart
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
- 
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -287,20 +318,24 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-✅ Key Points:
-Initialize HydratedBloc.storage for persistence
-BlocBuilder dynamically updates MaterialApp based on state
-🧩 Step 5: Theme Switcher UI Component
-Create ThemeModeSelector for manual selection:
+```
 
-dart
+### ✅ Key Points:
+- Initialize `HydratedBloc.storage` for persistence
+- `BlocBuilder` dynamically updates `MaterialApp` based on state
+
+## 🧩 Step 5: Theme Switcher UI Component
+
+Create `ThemeModeSelector` for manual selection:
+
+```dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_theme_test/theme/theme_bloc.dart';
- 
+
 class ThemeModeSelector extends StatelessWidget {
   const ThemeModeSelector({super.key});
- 
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ThemeBloc, ThemeState>(
@@ -347,7 +382,7 @@ class ThemeModeSelector extends StatelessWidget {
       },
     );
   }
- 
+
   IconData _getThemeIcon(ThemeMode themeMode) {
     switch (themeMode) {
       case ThemeMode.light:
@@ -359,29 +394,32 @@ class ThemeModeSelector extends StatelessWidget {
     }
   }
 }
-🧱 Step 6: Themed Card Component
+```
+
+## 🧱 Step 6: Themed Card Component
+
 Create a theme-aware card widget:
 
-dart
+```dart
 import 'package:flutter/material.dart';
- 
+
 class ThemedCard extends StatelessWidget {
   final String title;
   final String description;
   final IconData icon;
- 
+
   const ThemedCard({
     super.key,
     required this.title,
     required this.description,
     required this.icon,
   });
- 
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
- 
+
     return Card(
       elevation: 4,
       child: Padding(
@@ -418,20 +456,23 @@ class ThemedCard extends StatelessWidget {
     );
   }
 }
-🏡 Step 7: Home Screen Integration
-Implement in HomeScreen:
+```
 
-dart
+## 🏡 Step 7: Home Screen Integration
+
+Implement in `HomeScreen`:
+
+```dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
- 
+
 import 'package:flutter_theme_test/theme/theme_bloc.dart';
 import 'package:flutter_theme_test/widgets/theme_mode_selector.dart';
 import 'package:flutter_theme_test/widgets/themed_card.dart';
- 
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
- 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -513,12 +554,15 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-✅ Conclusion
-We've learned to:
+```
 
-Use Bloc for clean theme state management
-Implement persistence with hydrated_bloc
-Create theme-aware UI components (buttons, cards, switches)
+## ✅ Conclusion
+
+We've learned to:
+1. Use **Bloc** for clean theme state management
+2. Implement persistence with **hydrated_bloc**
+3. Create theme-aware UI components (buttons, cards, switches)
+
 This architecture extends beyond themes to features like language switching or layout preferences requiring persistence.
 
 Let me know if you need any adjustments to the translation!
