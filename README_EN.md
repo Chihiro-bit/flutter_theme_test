@@ -1,4 +1,3 @@
-Here's the English translation of your technical document. I've maintained the structure and technical accuracy while adapting the language for natural English flow:
 
 # Implement Dark Mode Switching & Persistence in Flutter with Bloc
 
